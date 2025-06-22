@@ -124,7 +124,7 @@ brew install maven
 
 Once the application is running, you can access:
 
-- **Frontend Application:** http://localhost:3000
+- **Frontend Application:** http://localhost:3000 (Note: If this port is busy, Next.js may automatically use `http://localhost:3001`. Check the terminal output from the start command.)
 - **Backend API:** http://localhost:8080
 - **API Documentation:** http://localhost:8080/api
 - **Health Check:** http://localhost:8080/actuator/health
@@ -165,7 +165,7 @@ The setup script provides several management commands:
 # Start both backend and frontend
 ./setup.sh start
 
-# Stop all services
+# Stop all services (forcefully terminates on ports 3000 & 8080)
 ./setup.sh stop
 
 # Restart all services
@@ -236,21 +236,29 @@ The setup script provides several management commands:
 
 ### Common Issues
 
-1. **PostgreSQL Connection Error:**
+1. **"Missing required error components" in browser:**
+   - This is a Next.js error. The project now includes `frontend/app/error.tsx` and `frontend/app/not-found.tsx` to handle this. If the error persists, try clearing the Next.js cache and restarting:
+     ```bash
+     ./setup.sh stop
+     rm -rf frontend/.next
+     ./setup.sh start
+     ```
+
+2. **PostgreSQL Connection Error:**
    - Ensure PostgreSQL is running: `brew services start postgresql@15`
-   - Check if database exists: `psql -l | grep crud_app`
+   - The setup script now automatically handles terminating old database connections during setup, which should prevent most access errors.
 
-2. **Port Already in Use:**
-   - Backend: `lsof -ti:8080 | xargs kill -9`
-   - Frontend: `lsof -ti:3000 | xargs kill -9`
+3. **Port Already in Use (e.g., on 3000 or 8080):**
+   - The `setup.sh` script now automatically kills any processes on ports 3000 and 8080 when you run `stop`, `start`, or `restart`, which should prevent most conflicts.
+   - If for some reason port `3000` is still occupied by an unrelated process, Next.js will automatically start on the next available port (e.g., `3001`). The correct URL will be displayed in the terminal when you run `./setup.sh start`.
 
-3. **Java Version Issues:**
+4. **Java Version Issues:**
    - Ensure Java 17+: `java -version`
-   - Set JAVA_HOME if needed
+   - Set `JAVA_HOME` if needed
 
-4. **Node.js Version Issues:**
+5. **Node.js Version Issues:**
    - Ensure Node.js 18+: `node -v`
-   - Use nvm to manage Node.js versions
+   - Use `nvm` to manage Node.js versions
 
 ### Logs and Debugging
 
@@ -269,6 +277,8 @@ CRUD-Application/
 │   └── pom.xml            # Maven dependencies
 ├── frontend/               # Next.js application
 │   ├── app/               # Next.js app directory
+│   │   ├── error.tsx       # Global error boundary
+│   │   └── not-found.tsx   # Global 404 page
 │   ├── components/        # React components
 │   └── package.json       # Node.js dependencies
 ├── setup.sh              # Management script

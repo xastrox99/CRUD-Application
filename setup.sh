@@ -187,26 +187,26 @@ start_frontend() {
 # Function to stop all services
 stop_services() {
     print_status "Stopping all services..."
-    
-    # Stop backend
-    if [ -f backend.pid ]; then
-        BACKEND_PID=$(cat backend.pid)
-        if kill -0 $BACKEND_PID 2>/dev/null; then
-            kill $BACKEND_PID
-            print_success "Backend stopped"
-        fi
-        rm -f backend.pid
+
+    # Forcefully stop anything on port 8080 (backend)
+    print_status "Stopping service on port 8080..."
+    if lsof -ti:8080 > /dev/null; then
+        lsof -ti:8080 | xargs kill -9
+        print_success "Backend service on port 8080 stopped."
+    else
+        print_warning "No service was running on port 8080."
     fi
-    
-    # Stop frontend
-    if [ -f frontend.pid ]; then
-        FRONTEND_PID=$(cat frontend.pid)
-        if kill -0 $FRONTEND_PID 2>/dev/null; then
-            kill $FRONTEND_PID
-            print_success "Frontend stopped"
-        fi
-        rm -f frontend.pid
+    rm -f backend.pid
+
+    # Forcefully stop anything on port 3000 (frontend)
+    print_status "Stopping service on port 3000..."
+    if lsof -ti:3000 > /dev/null; then
+        lsof -ti:3000 | xargs kill -9
+        print_success "Frontend service on port 3000 stopped."
+    else
+        print_warning "No service was running on port 3000."
     fi
+    rm -f frontend.pid
 }
 
 # Function to show logs
