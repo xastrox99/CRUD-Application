@@ -298,17 +298,7 @@ CRUD-Application/
    - Create components in `frontend/components/`
    - Update API calls in `frontend/app/lib/api.ts`
 
-## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
 
 ## 📞 Support
 
